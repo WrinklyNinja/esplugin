@@ -118,6 +118,13 @@ impl<'a> SubrecordRef<'a> {
         ))
     }
 
+    pub fn from_subrecord(subrecord: &'a Subrecord) -> SubrecordRef<'a> {
+        SubrecordRef {
+            subrecord_type: *subrecord.subrecord_type(),
+            data: &subrecord.data,
+        }
+    }
+
     pub fn subrecord_type(&'a self) -> &SubrecordType {
         &self.subrecord_type
     }

@@ -4,7 +4,7 @@ use std::{f32, mem, panic, ptr};
 use libc::{c_char, c_float, size_t};
 
 use constants::*;
-use esplugin::Plugin;
+use esplugin::{ParseMode, Plugin};
 use helpers::*;
 
 #[no_mangle]
@@ -45,8 +45,13 @@ pub unsafe extern "C" fn esp_plugin_parse(plugin_ptr: *mut Plugin, load_header_o
         if plugin_ptr.is_null() {
             ESP_ERROR_NULL_POINTER
         } else {
+            let mode = if load_header_only {
+                ParseMode::HeaderOnly
+            } else {
+                ParseMode::RecordIds
+            };
             let plugin = &mut *plugin_ptr;
-            match plugin.parse_file(load_header_only) {
+            match plugin.parse_file(mode) {
                 Ok(_) => ESP_OK,
                 Err(_) => ESP_ERROR_PARSE_ERROR,
             }
@@ -168,7 +173,12 @@ pub unsafe extern "C" fn esp_plugin_is_valid(
                 Err(x) => return x,
             };
 
-            *is_valid = Plugin::is_valid(mapped_game_id, rust_path, load_header_only);
+            let mode = if load_header_only {
+                ParseMode::HeaderOnly
+            } else {
+                ParseMode::RecordIds
+            };
+            *is_valid = Plugin::is_valid(mapped_game_id, rust_path, mode);
 
             ESP_OK
         }
